@@ -26,6 +26,9 @@ def getAndTranslateGPGGA(serial):
 						"checksum"],message.split(",")))
 	return GPGGAMessage
 	
+getAndTranslateI2C():
+
+return 0
 	
 def setUpDir():
 	logsDir = os.getcwd() + '/logs'
@@ -52,8 +55,9 @@ def setUpSerial():
 	
 def startlogging(file, serial):
 	while True:
-			mess = getAndTranslateGPGGA(serial)
-			file.write(mess.get("timestamp") + ',' + mess.get("latitude") + ',' +mess.get("ns_indicator") + ',' +mess.get("longitude") + ',' +mess.get("ew_indicator") + ',' +mess.get("position_fix_indicator") + ',' +mess.get("checksum") )
+			gps_mess = getAndTranslateGPGGA(serial)
+			air_mess = getAndTranslateI2C()
+			file.write(gps_mess.get("timestamp") + ',' + gps_mess.get("latitude") + ',' +gps_mess.get("ns_indicator") + ',' +gps_mess.get("longitude") + ',' +gps_mess.get("ew_indicator") + ',' +gps_mess.get("position_fix_indicator") + ',' +gps_mess.get("checksum") )
 			print(file.name)
 def main():
 	serial = setUpSerial()

@@ -28,25 +28,20 @@ def get_and_translate_gpgga(serial):
 						"checksum"],message.split(",")))
 	return gpgga_message
 	
-def get_air_quality_data():
-	pi = pigpio.pi()
-	if not pi.connected:
-		print("no pi")
-	i2c_bus = 1
-	i2c_address = 0x5a
+def get_air_quality_data(pi,handle):
 	i2c_read_bytes = 9
-	
+	byte_when_ready = 0x00
 	warm_up = True
+	
 	while warm_up:
-		handle = pi.i2c_open(i2c_bus, i2c_address)
+		
 		count, data = pi.i2c_read_device(handle, i2c_read_bytes)
 		
-		print(data[2])
-		if data[2] is 0x00:
+		if data[2] is byte_when_ready:
 			warm_up = False
-		
-	#pi.i2c_close(handle)
-	#pi.stop()
+		else:
+			time.sleep(5)
+	
 	return data
 
 def translate_air_data(data):
@@ -77,27 +72,45 @@ def set_up_serial():
 	)
 	return serial_complete
 	
-def start_logging(file, serial):
-	while True:
-		gpgga_message = get_and_translate_gpgga(serial)
+def set_up_i2c(i2c_bus,i2c_address):
+	pi = pigpio.pi()
+	if not pi.connected:
+		pi.close()
+		exit()
+	handle = pi.i2c_open(i2c_bus, i2c_address)
+	
+	return pi, handle
 
+def start_logging(file, serial,pi,handle):
+	largest_file_size = 250000
+	while os.path.getsize(file.name) < largest_file_size:
+		gpgga_message = get_and_translate_gpgga(serial)
+		air_quality_message = get_air_quality_data(pi,handle)
 		co2 , toc = translate_air_data(air_quality_message)
+		
 		file.write(gpgga_message.get("timestamp") + ','
 				   + gpgga_message.get("latitude") + ','
-				   +gpgga_message.get("ns_indicator") + ','
-				   +gpgga_message.get("longitude") + ','
-				   +gpgga_message.get("ew_indicator") + ','
-				   +gpgga_message.get("position_fix_indicator") + ','
-				   +gpgga_message.get("checksum") + ','
+				   + gpgga_message.get("ns_indicator") + ','
+				   + gpgga_message.get("longitude") + ','
+				   + gpgga_message.get("ew_indicator") + ','
+				   + gpgga_message.get("position_fix_indicator") + ','
+				   + gpgga_message.get("checksum") + ','
 				   + co2 + ','
 				   + toc)
 		print(file.name)
 		
 def main():
+	i2c_bus = 1
+	i2c_address = 0x5a
+	pi, handle = set_up_i2c(i2c_bus,i2c_address)
 	serial = set_up_serial()
 	file = set_up_dir()
-	start_logging(file, serial)
+	
+	start_logging(file, serial,pi,handle)
+	
+	#do I need to close file and serial? Look it up
 	#file.close()
 	
-air_quality_message = get_air_quality_data()
+	pi.i2c_close(handle)
+	pi.close()
 main()

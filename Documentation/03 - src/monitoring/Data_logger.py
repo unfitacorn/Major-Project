@@ -40,6 +40,7 @@ def get_air_quality_data(pi,handle):
 		if data[2] is byte_when_ready:
 			warm_up = False
 		else:
+			print("waiting for warm up of air quality")
 			time.sleep(5)
 	
 	return data
@@ -82,34 +83,41 @@ def set_up_i2c(i2c_bus,i2c_address):
 	return pi, handle
 
 def start_logging(file, serial,pi,handle):
-	largest_file_size = 250000
-	while os.path.getsize(file.name) < largest_file_size:
-		gpgga_message = get_and_translate_gpgga(serial)
-		air_quality_message = get_air_quality_data(pi,handle)
-		co2 , toc = translate_air_data(air_quality_message)
-		
-		file.write(gpgga_message.get("timestamp") + ','
-				   + gpgga_message.get("latitude") + ','
-				   + gpgga_message.get("ns_indicator") + ','
-				   + gpgga_message.get("longitude") + ','
-				   + gpgga_message.get("ew_indicator") + ','
-				   + gpgga_message.get("position_fix_indicator") + ','
-				   + gpgga_message.get("checksum") + ','
-				   + co2 + ','
-				   + toc)
-		print(file.name)
+	gpgga_message = get_and_translate_gpgga(serial)
+	air_quality_message = get_air_quality_data(pi,handle)
+	co2 , toc = translate_air_data(air_quality_message)
+	print(co2)
+	file.write(gpgga_message.get("timestamp") + ','
+				+ gpgga_message.get("latitude") + ','
+				+ gpgga_message.get("ns_indicator") + ','
+				+ gpgga_message.get("longitude") + ','
+				+ gpgga_message.get("ew_indicator") + ','
+				+ gpgga_message.get("position_fix_indicator") + ','
+				+ gpgga_message.get("checksum") + ','
+				+ str(co2) + ','
+				+ str(toc))
+	print(file.name)
 		
 def main():
+	print("setting variables...")
 	i2c_bus = 1
 	i2c_address = 0x5a
+	largest_file_size = 250000
+	print("setting i2c interface...")
 	pi, handle = set_up_i2c(i2c_bus,i2c_address)
+	print("setting serial interface...")
 	serial = set_up_serial()
-	file = set_up_dir()
+	logging = True
+	while logging:
+		print("creating file...")
+		file = set_up_dir()
+		print("Logging starting...")
+		while os.path.getsize(file.name) < largest_file_size:
+		
+			start_logging(file, serial,pi,handle)
+		
 	
-	start_logging(file, serial,pi,handle)
-	
-	#do I need to close file and serial? Look it up
-	#file.close()
+		file.close()
 	
 	pi.i2c_close(handle)
 	pi.close()

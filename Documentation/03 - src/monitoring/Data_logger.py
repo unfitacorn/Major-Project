@@ -32,7 +32,6 @@ def get_and_translate_gpgga(serial):
 			break
 		else:
 			print("waiting for GPS fix")
-	print(gpgga_message)
 	return gpgga_message
 	
 def get_air_quality_data(pi,handle):
@@ -42,7 +41,6 @@ def get_air_quality_data(pi,handle):
 	
 	while warm_up:
 		count, data = pi.i2c_read_device(handle, i2c_read_bytes)
-		print(*data)
 		if data[2] is byte_when_ready:
 			warm_up = False
 		else:
@@ -63,7 +61,7 @@ def set_up_dir():
 	file_path = logs_dir + '/~log ' + str(time.strftime("%c")) + '.txt'
 	file_path = file_path.replace(':','')
 	file = open(file_path,'a')
-	file.write('timestamp,lat,ns,long,ew,pos_fix,checksum,CO2,TOC\r\n')
+	file.write('timestamp,lat,long,pos_fix,CO2,TOC\r\n')
 	file.close()
 	return file_path
 	
@@ -93,19 +91,32 @@ def start_logging(file, serial,pi,handle):
 	gpgga_message = get_and_translate_gpgga(serial)
 	air_quality_message = get_air_quality_data(pi,handle)
 	co2 , toc = translate_air_data(air_quality_message)
-	print("CO2: " + str(co2))
-	print("TOC: " + str(toc))
+
+	if gpgga_message.get("ns_indicator") is 'S':
+		gpgga_message['latitude'] = str(float(gpgga_message.get("latitude"))*-1)
+	if gpgga_message.get("ew_indicator") is 'W':
+		gpgga_message['longitude'] = str(float(gpgga_message.get("longitude"))*-1)
+
 	file.write(gpgga_message.get("timestamp") + ','
-				+ gpgga_message.get("latitude") + ','
-				+ gpgga_message.get("ns_indicator") + ','
-				+ gpgga_message.get("longitude") + ','
-				+ gpgga_message.get("ew_indicator") + ','
+				+ str(float(gpgga_message.get("latitude"))/10) + ','
+				+ str(float(gpgga_message.get("longitude"))/10) + ','
 				+ gpgga_message.get("position_fix_indicator") + ','
-				+ gpgga_message.get("checksum") + ','
 				+ str(co2) + ','
 				+ str(toc) + '\r\n')
+
+
+#needs to check for files that were open when RPi shuts down. Removes '~' from start of the file names
+def checkPreviousFiles():
+	for root, dirs,files in os.walk(os.getcwd() + '/logs'):
+		for filename in files:
+			if filename.startswith('~'):
+				#rename file
+				filenamelogs = os.getcwd() + '/logs/' + filename
+				os.rename(filenamelogs,filenamelogs.replace('~',''))
 		
 def main():
+	print("Checking previous files")
+	checkPreviousFiles()
 	print("setting variables...")
 	i2c_bus = 1
 	i2c_address = 0x5a
@@ -128,4 +139,5 @@ def main():
 		os.rename(file_path,file_path.replace('~',''))
 	pi.i2c_close(handle)
 	pi.close()
+
 main()

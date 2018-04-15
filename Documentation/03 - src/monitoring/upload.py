@@ -45,10 +45,12 @@ def create_table(cursor_obj):
 	cursor_obj.execute(sql_cmd)
 	
 def setup_mysql():
-	connection = pymysql.connect(host='db.dcs.aber.ac.uk',
-                             user='rdm10',
-                             password='majorproject',
-                             db='rdm10')
+	file = open("sqlserverdetails.txt","r")
+	sqldetails = dict(zip(['host','user','password','db'],file.read().splitlines()))
+	connection = pymysql.connect(host=sqldetails.get('host'),
+                             user=sqldetails.get('user'),
+                             password=sqldetails.get('password'),
+                             db=sqldetails.get('db'))
 	cursor_obj = connection.cursor()
 	
 	return cursor_obj,connection
@@ -56,15 +58,17 @@ def setup_mysql():
 def upload(filename,cursor_obj,connection):
 	file= open(filename,'r+')
 	data = file.read().splitlines()
-	data.pop(0)
+	print(data[1:-1])
+	data =data[1:-1]
 	
 	sql = "INSERT INTO MMP (timestamp,latitude,longitude,pos_fix,CO2,TOC) VALUES "
 	for dataItem in data:
-		sql += "(" + formattedData + "),"
+		if dataItem is not "":
+			sql += "(" + dataItem + "),"
+
 
 		
 	sql= sql[:-1]
-	print(sql)
 	cursor_obj.execute(sql)
 	connection.commit()
 

@@ -3,7 +3,20 @@ import time
 import RPi.GPIO as gpio
 import os
 import pigpio
+"""
+Error LED table
+2 flash - waiting for GPS
+3 flash - warm up for air quality
+on then off - Logging (everything okay)
+"""
 
+def led_out(flashes):
+	for i in range(0,flashes):
+		gpio.output(24,1)
+		time.sleep(0.25)
+		gpio.output(24,0)
+		if flashes is not 0:
+			time.sleep(0.25)
 
 
 def get_and_translate_gpgga(serial):
@@ -31,7 +44,9 @@ def get_and_translate_gpgga(serial):
 		if gpgga_message.get("position_fix_indicator") is '1':
 			break
 		else:
-			print("waiting for GPS fix")
+			led_out(2)
+			time.sleep(30)
+
 	return gpgga_message
 	
 def get_air_quality_data(pi,handle):
@@ -41,11 +56,16 @@ def get_air_quality_data(pi,handle):
 	
 	while warm_up:
 		count, data = pi.i2c_read_device(handle, i2c_read_bytes)
-		if data[2] is byte_when_ready:
-			warm_up = False
-		else:
-			print("Air Quality Sensor in warm up state")
-			time.sleep(5)
+		try:
+			
+			if data[2] is byte_when_ready:
+				warm_up = False
+			else:
+				print("Air Quality Sensor in warm up state")
+				led_out(3)
+				time.sleep(20)
+		except Exception as e:
+			raise e
 		
 	return data
 
@@ -66,7 +86,7 @@ def set_up_dir():
 	return file_path
 	
 def set_up_serial():
-	gpio.setmode(gpio.BCM)
+	
 	gpio.setup(12,gpio.OUT)
 	serial_complete = serial.Serial(
 			   port='/dev/ttyS0',
@@ -76,6 +96,8 @@ def set_up_serial():
                bytesize=serial.EIGHTBITS,
                timeout=1
 	)
+	print("waiting for GPS fix")
+	get_and_translate_gpgga(serial_complete)
 	return serial_complete
 	
 def set_up_i2c(i2c_bus,i2c_address):
@@ -103,6 +125,7 @@ def start_logging(file, serial,pi,handle):
 				+ gpgga_message.get("position_fix_indicator") + ','
 				+ str(co2) + ','
 				+ str(toc) + '\r\n')
+	led_out(1)
 
 
 #needs to check for files that were open when RPi shuts down. Removes '~' from start of the file names
@@ -115,6 +138,8 @@ def checkPreviousFiles():
 				os.rename(filenamelogs,filenamelogs.replace('~',''))
 		
 def main():
+	gpio.setmode(gpio.BCM)
+	gpio.setup(24,gpio.OUT)
 	print("Checking previous files")
 	checkPreviousFiles()
 	print("setting variables...")

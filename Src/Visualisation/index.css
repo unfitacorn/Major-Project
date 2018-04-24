@@ -1,0 +1,59 @@
+html, body {
+    height: 100%;
+}
+#map { 
+	height: 75%; 
+}
+/*https://webdesign.tutsplus.com/tutorials/how-to-build-web-form-layouts-with-css-grid--cms-28776*/
+
+form#ranges label {
+    float: left;
+    padding-right: 24px;
+}
+
+form#ranges input {
+    width: calc(100% - 100px);
+}
+/*https://www.w3schools.com/css/tryit.asp?filename=trycss_navbar_horizontal_black*/
+#menu ul {
+	list-style-type: none;
+	margin: 0;
+    padding: 0;
+    overflow: hidden;
+	background-color: #333;
+}
+
+#menu li {
+    float: left;
+}
+
+#menu li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+#menu li a:hover {
+    background-color: #111;
+}
+#footer{
+    border: 2px solid #333;
+    border-radius: 12px;
+    text-align: center;
+    padding-left: 500px;
+    padding-right: 500px;
+}
+
+#downloads ul { 
+    text-align: center;
+    border: 2px solid #333;
+    border-radius: 12px;
+    list-style-type: none;
+}
+#about{
+    text-align: center;
+    padding-left: 500px;
+    padding-right: 500px;
+}

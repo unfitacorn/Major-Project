@@ -58,7 +58,6 @@ def setup_mysql():
 def upload(filename,cursor_obj,connection):
 	file= open(filename,'r+')
 	data = file.read().splitlines()
-	print(data[1:-1])
 	data =data[1:-1]
 	
 	sql = "INSERT INTO MMP (timestamp,latitude,longitude,pos_fix,CO2,TOC) VALUES "
@@ -69,6 +68,7 @@ def upload(filename,cursor_obj,connection):
 
 		
 	sql= sql[:-1]
+	print(sql)
 	cursor_obj.execute(sql)
 	connection.commit()
 
@@ -90,8 +90,6 @@ def main():
 	if not table_exists(cursor_obj):
 		create_table(cursor_obj)
 	find_and_upload_log_files(cursor_obj,connection)
-	
-	
-	
+	print("Data Upload Complete")
 
 main()

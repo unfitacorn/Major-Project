@@ -24,6 +24,7 @@ def get_and_translate_gpgga(serial):
 	while True:
 		while "GPGGA" not in message:
 			message = serial.readline().decode('utf-8').replace('\r\n','')
+			print(message)
 			
 		gpgga_message = dict(zip(["message_ID",
 							"timestamp",
@@ -40,12 +41,12 @@ def get_and_translate_gpgga(serial):
 							"units",
 							"age_of_diff_corr",
 							"checksum"],message.split(",")))
-							
+					
 		if gpgga_message.get("position_fix_indicator") is '1':
 			break
 		else:
 			led_out(2)
-			time.sleep(30)
+			time.sleep(20)
 
 	return gpgga_message
 	
@@ -114,14 +115,19 @@ def start_logging(file, serial,pi,handle):
 	air_quality_message = get_air_quality_data(pi,handle)
 	co2 , toc = translate_air_data(air_quality_message)
 
-	if gpgga_message.get("ns_indicator") is 'S':
+	gpgga_message['latitude'] = change_format_of_GPS(float(gpgga_message.get('latitude')))
+	gpgga_message['longitude'] = change_format_of_GPS(float(gpgga_message.get('longitude')))
+
+	if gpgga_message.get('ns_indicator') is 'S':
 		gpgga_message['latitude'] = str(float(gpgga_message.get("latitude"))*-1)
-	if gpgga_message.get("ew_indicator") is 'W':
+	if gpgga_message.get('ew_indicator') is 'W':
 		gpgga_message['longitude'] = str(float(gpgga_message.get("longitude"))*-1)
 
+	
+
 	file.write(gpgga_message.get("timestamp") + ','
-				+ str(float(gpgga_message.get("latitude"))/10) + ','
-				+ str(float(gpgga_message.get("longitude"))/10) + ','
+				+ str(float(gpgga_message.get("latitude"))) + ','
+				+ gpgga_message.get("longitude") + ','
 				+ gpgga_message.get("position_fix_indicator") + ','
 				+ str(co2) + ','
 				+ str(toc) + '\r\n')
@@ -137,6 +143,12 @@ def checkPreviousFiles():
 				filenamelogs = os.getcwd() + '/logs/' + filename
 				os.rename(filenamelogs,filenamelogs.replace('~',''))
 		
+def change_format_of_GPS(GPS_measurement):
+	degree = int(GPS_measurement/100)
+	minutes = GPS_measurement % 100
+
+	return format(degree + (minutes/60),'.5f')
+
 def main():
 	gpio.setmode(gpio.BCM)
 	gpio.setup(24,gpio.OUT)

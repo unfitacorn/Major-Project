@@ -1,4 +1,0 @@
-db.dcs.aber.ac.uk
-rdm10
-majorproject
-rdm10

@@ -24,7 +24,7 @@
 				<li><a href="LICENSE" download>License</a></li>
 			</ul>		
 		</div>
-		</br>
+		<br>
 		<div id="footer">
 		<p>
 			The information provided on this and other pages by me, Robert Mouncer (rdm10@aber.ac.uk), is under my own personal responsibility and not that of Aberystwyth University. Similarly, any opinions expressed are my own and are in no way to be taken as those of A.U. The use of the University's logo or crest is not allowed on individual user's web pages.

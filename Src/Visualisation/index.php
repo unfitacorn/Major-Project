@@ -19,17 +19,18 @@
 		</ul>
 		</div>
 
-		</br>
+		<br>
 
 		<div id="map"></div>
 			<script src="./dist/leaflet-heat1.js"></script>
-
+			<div id="value_air_quality"></div>
+			<div id="additional_info"></div>
 			<form id="radios">
 
-				<label for="data_type_CO2">CO2</label>
+				<label for="data_type_CO2">CO2 (parts per million)</label>
   				<input type="radio" name="data_type" id="data_type_CO2" value="CO2" checked="checked" onchange="changeData()">
   				
-  				<label for="data_type_TOC">TO2</label>
+  				<label for="data_type_TOC">TO2 (parts per million)</label>
   				<input type="radio" name="data_type" id="data_type_TOC" value="TOC" onchange="changeData()">
 			</form>
   			<form id="ranges">
@@ -117,7 +118,9 @@
       						mindif = dif;
     					}
   					}
-  					alert(data[closest]);
+  					var radioButtonValue = document.querySelector('input[name = "data_type"]:checked').value;
+  					document.getElementById("value_air_quality").innerHTML = radioButtonValue + ": " + data[closest][2];
+  					document.getElementById("additional_info").innerHTML = "Insert information here about effects on human health"
 				}
 					
 			</script>

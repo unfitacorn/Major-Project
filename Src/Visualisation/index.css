@@ -42,8 +42,8 @@ form#ranges input {
     border: 2px solid #333;
     border-radius: 12px;
     text-align: center;
-    padding-left: 500px;
-    padding-right: 500px;
+    padding-left: 20%;
+    padding-right: 20%;
 }
 
 #downloads ul { 
@@ -54,6 +54,10 @@ form#ranges input {
 }
 #about{
     text-align: center;
-    padding-left: 500px;
-    padding-right: 500px;
+    padding-left: 20%;
+    padding-right: 20%;
+
+}
+#about ul{
+    list-style-type: none;
 }

@@ -18,6 +18,9 @@
 		</div>
 		
 		<div id="about">
+			<h1>
+				Information about this website
+			</h1>
 			<p>
 				This page has been created for my third year major project in Aberystwyth University. 
 			</p>
@@ -27,8 +30,19 @@
 			<p>
 				Data is collected using a microcontroller, GPS and air quality sensor. The data has been collected in a vehicle as they are often used for long distances and can collect a large amount fo data.
 			</p>
+			<h1>
+				How to use the source
+			</h1>
+				<ul>
+					<li>Download the source code from the download tab.</li>
+					<li>Edit the getData.php file to link to the database.</li>
+					<li>Edit the same file to query the required database.</li>
+					<li>Ensure the server you are hosting on can use php.</li>
+					<li>Edit php pages to fit your needs.</li>
+				</ul>
+				
 		</div>
-		</br>
+		<br>
 		<div id="footer">
 		<p>
 			The information provided on this and other pages by me, Robert Mouncer (rdm10@aber.ac.uk), is under my own personal responsibility and not that of Aberystwyth University. Similarly, any opinions expressed are my own and are in no way to be taken as those of A.U. The use of the University's logo or crest is not allowed on individual user's web pages.

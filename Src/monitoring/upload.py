@@ -1,21 +1,20 @@
 #file used to upload data to sql
-import socket
 import subprocess
 import time
 import pymysql
 import os
 
-#https://stackoverflow.com/questions/20913411/test-if-an-internet-connection-is-present-in-python
-#check connection to internet (using google)
+
 def connected():
     try:
-        # connect to the host -- tells us if the host is actually
-        # reachable
-        socket.create_connection(("www.google.com", 80))
-        return True
-    except OSError:
-        pass
-    return False
+        response = os.system("ping -c 1 vpn.aber.ac.uk")
+
+        if not response:
+        	return True
+        else:
+        	return False
+    except:
+    	return False
 #https://stackoverflow.com/questions/4760215/running-shell-command-from-python-and-capturing-the-output 
 #check that the vpn is running
 def openvpn_running():
@@ -27,7 +26,7 @@ def openvpn_running():
 		print("No connection to VPN, attempting to connect")
 		subprocess.call(['sudo','openvpn','--config','/etc/openvpn/Aberystwyth.ovpn','--daemon'])
 		time.sleep(15)
-	#run the ifconfig tun0 again
+	#run the ifconfig tun0 again. Checks if vpn is connected
 	output= subprocess.run(['ifconfig', 'tun0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 	#
 	if not output:
@@ -43,7 +42,7 @@ def table_exists(cursor_obj,table_name):
 	tables = cursor_obj.fetchall()
 	#loop over tables checking for MMP table
 	for table in tables:
-		if 'MMP' in table[0]:
+		if table_name in table[0]:
 			return True
 	return False
 
@@ -63,7 +62,6 @@ def setup_mysql():
                              password=sqldetails.get('password'),
                              db=sqldetails.get('db'))
 	cursor_obj = connection.cursor()
-	
 	return cursor_obj,connection
 	
 
@@ -74,13 +72,16 @@ def upload(filename,cursor_obj,connection):
 	data = file.read().splitlines()
 	#remove headings and last line (blank line)
 	data =data[1:-1]
+	if len(data) is 0:
+		return
 	#create long statement for each file
 	sql = "INSERT INTO MMP (timestamp,latitude,longitude,pos_fix,CO2,TOC) VALUES "
 	for dataItem in data:
 		if dataItem is not "":
 			sql += "(" + dataItem + "),"
-	#remove blank values
+	#remove comma from end of string
 	sql= sql[:-1]
+	print("sql: " + sql)
 	cursor_obj.execute(sql)
 	#commit statement
 	connection.commit()

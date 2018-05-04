@@ -35,7 +35,7 @@ def get_and_translate_gpgga(serial):
 		while "GPGGA" not in message:
 			#request message and decode + remove endline
 			message = serial.readline().decode('utf-8').replace('\r\n','')
-			print(message)
+
 		#zip message into dictionary
 		gpgga_message = dict(zip(["message_ID",
 							"timestamp",
@@ -57,7 +57,7 @@ def get_and_translate_gpgga(serial):
 			break
 		else:
 			led_out(2)
-			time.sleep(20)
+			
 
 	return gpgga_message
 
@@ -87,6 +87,8 @@ def get_air_quality_data(pi,handle):
 	
 	while warm_up:
 		count, data = pi.i2c_read_device(handle, i2c_read_bytes)
+		while count < i2c_read_bytes:
+			time.sleep(10)
 		try:
 			#air quality message [2] is 0 when ready 
 			if data[2] is byte_when_ready:
@@ -105,20 +107,23 @@ def translate_air_data(data):
 	toc = (data[7]*256)+data[8]
 	return co2, toc
 #open the communication with the i2c bus using pigpio
-def set_up_i2c(i2c_bus,i2c_address):
+def set_up_i2c():
+	i2c_bus = 1
+	i2c_address = 0x5a
+
 	pi = pigpio.pi()
 	if not pi.connected:
 		pi.close()
 		exit()
 	handle = pi.i2c_open(i2c_bus, i2c_address)
-	
+	get_air_quality_data(pi,handle)
 	return pi, handle
 
 
 #______________________________________Directory Functions________________________________________________#
 
 #needs to check for files that were open when RPi shuts down. Removes '~' from start of the file names
-def checkPreviousFiles():
+def check_previous_files():
 	#get all files and folders in /logs folder
 	for root, dirs,files in os.walk(os.getcwd() + '/logs'):
 		#loop through all files
@@ -181,16 +186,15 @@ def main():
 	gpio.setwarnings(False)
 	
 	print("Checking previous files")
-	checkPreviousFiles()
+	check_previous_files()
 	print("setting variables...")
 	#variables for i2c
-	i2c_bus = 1
-	i2c_address = 0x5a
+	
 	#largest kb file size
 	largest_file_size_kb = 25
 	
 	print("setting i2c interface...")
-	pi, handle = set_up_i2c(i2c_bus,i2c_address)
+	pi, handle = set_up_i2c()
 	print("setting serial interface...")
 	serial = set_up_serial()
 	logging = True
@@ -200,13 +204,19 @@ def main():
 		print("Logging starting...")
 		#while file size is less than largest file size - log
 		while os.path.getsize(file_path)/1024 < largest_file_size_kb:
+			#open the file to append 'a'
 			file = open(file_path,'a')
+			#for presenting
 			print("filesize: " + str(os.path.getsize(file.name)/1024))
+			#log
 			start_logging(file, serial,pi,handle)
 			file.close()
+		#rename file and remove the ~	
 		os.rename(file_path,file_path.replace('~',''))
+	#close handles
 	pi.i2c_close(handle)
 	pi.close()
 
+#this stops the main function being called when the script is imported
 if __name__ == "__main__":
    main()

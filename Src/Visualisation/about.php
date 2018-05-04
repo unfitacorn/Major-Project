@@ -1,22 +1,29 @@
+<!--
+This is used to display any errors
+e.g. If permissions have not been set, an error will be stated on the webpage.
+-->
 <?php ini_set("display_errors", 1); ?>
+<!--define the document  type-->
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-    	<title>test</title>
-
+		<!--Display on the window tab-->
+    	<title>Air Quaity Mapping</title>
+		<!--load the CSS file for this page-->
     	<link rel="stylesheet" href="index.css">
 
 	</head>
 	<body>
+		<!--create links to other web pages-->
 		<div id="menu">
 		<ul>
-   			<li><a href="/rdm10/visualisation/">Map</a></li>
-  			<li><a href="/rdm10/visualisation/about.php">About This Website</a></li>
-  			<li><a href="/rdm10/visualisation/src.php">Source and License</a></li>
+  			<li><a href="index.php">Map</a></li>
+  			<li><a href="about.php">About This Website</a></li>
+  			<li><a href="src.php">Source and License</a></li>
 
 		</ul>
 		</div>
-		
+		<!--display info about the page with links to plugins used-->
 		<div id="about">
 			<h1>
 				Information about this website
@@ -34,7 +41,7 @@
 				How to use the source
 			</h1>
 				<ul>
-					<li>Download the source code from the download tab.</li>
+					<li>Download the source code from the source tab.</li>
 					<li>Edit the getData.php file to link to the database.</li>
 					<li>Edit the same file to query the required database.</li>
 					<li>Ensure the server you are hosting on can use php.</li>
@@ -43,11 +50,12 @@
 				
 		</div>
 		<br>
+		<!-- This footer is on each webpage -->
 		<div id="footer">
 		<p>
 			The information provided on this and other pages by me, Robert Mouncer (rdm10@aber.ac.uk), is under my own personal responsibility and not that of Aberystwyth University. Similarly, any opinions expressed are my own and are in no way to be taken as those of A.U. The use of the University's logo or crest is not allowed on individual user's web pages.
 		</p>
-
+		<!--validators for easy development-->
 		<p>
       		<a href="http://validator.w3.org/check?uri=referer"><img
 			src="http://www.w3.org/html/logo/badge/html5-badge-h-solo.png" 

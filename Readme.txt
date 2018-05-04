@@ -1,11 +1,26 @@
 #################################Documentation##################################
+01 - Planning
+	All documents related to planning including the OPS included in this folder
+02 - Design
+	All documents related to Design. These include diagrams, images and datasheets
+03 - Report
+	Final report has been stored here.
+99 - presentations
+	Presentations given in supervisor meetings are stored here.
 
 #################################Src##################################
 ______Monitoring______
 The monitoring system is for collceting data using a GPS and air quality sensor. Data is gathered and then uploaded to the University MySQL server before being removed from the device.
-Monitoring files are designed and implemented to work with a Raspberry Pi Model 3B+ (RPI) with specific components. These scripts will most likely fail without the hardware connected and correct configuration.
+Monitoring files are designed and implemented to work with a Raspberry Pi Model 3B+ (RPI) with specific components running on Raspbian Lite. These scripts will most likely fail without the hardware connected and correct configuration.
 GPS - PModGPS GPS receiver: https://uk.rs-online.com/web/p/processor-microcontroller-development-kits/1346455/
 Air quality Sensor:ams IAQ-CORE P- https://uk.rs-online.com/web/p/colour-light-sensors/1730309/
+
+Crontab jobs should be created using 'crontab -e'. This should be appeneded to the end of the file:
+
+	@reboot sleep 20 && /home/pi/startlogger.sh
+	* /2 * * * * /home/pi/runUpload.sh
+
+This will run data logging python script on start up and the uploader every 2 minutes.
 
 Required setup:
 	The following packages need installing on the RPI:
@@ -15,8 +30,8 @@ Required setup:
 		- pytest (pip install -U pytest)
 		- pymysql (pip install PyMySQL)
 
-	The following files and folder should be in the user directory of the RPI (/home/pi/):
-		- /logs/
+	All Python files are designed to run on Python3. The following files and folder should be in the user directory of the RPI (/home/pi/):
+		- /logs/ (example log contained in this folder)
 		- Data_logger.py (collects data from the GPS and air quality sensor and logs them in the /logs/ folder)
 		- Data_logger_test.py (unit tests for the Data_logger.py)
 		- runTests.sh (Will run both unit test files Data_logger_test.py and upload_test.py)
